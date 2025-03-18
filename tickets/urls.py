@@ -7,7 +7,8 @@ from .views import (
     ListMensajeView, DetailMensajeView,
     ListMultimediaView, DetailMultimediaView,
     ListUserView, DetailUserView,
-    ListGroupView, DetailGroupView
+    ListGroupView, DetailGroupView,
+    LoginView
 )
 
 urlpatterns = [
@@ -34,4 +35,6 @@ urlpatterns = [
     
     path('grupos/', ListGroupView.as_view(), name='list_grupos'),
     path('grupos/<int:pk>/', DetailGroupView.as_view(), name='detail_grupo'),
+
+    path("login/", LoginView.as_view(), name="login"),
 ]

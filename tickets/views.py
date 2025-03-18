@@ -2,6 +2,10 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateDe
 from django.contrib.auth.models import User, Group
 from .models import Proyecto, Status, Ticket, StatusTicket, Mensaje, Multimedia
 from .serializers import ProyectoSerializer, StatusSerializer, TicketSerializer, StatusTicketSerializer, MensajeSerializer, MultimediaSerializer,  UserSerializer, GroupSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import authenticate
 
 class ListProyectoView(ListAPIView, CreateAPIView):
     allowed_methods = ['GET', 'POST']
@@ -83,3 +87,38 @@ class DetailGroupView(RetrieveUpdateDestroyAPIView):
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = GroupSerializer
     queryset = Group.objects.all()
+
+
+class LoginView(ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = []  # Permitir acceso sin autenticación previa
+
+    def get_queryset(self):
+        username = self.request.query_params.get("username")
+        password = self.request.query_params.get("password")
+
+        if not username or not password:
+            return User.objects.none()  # No devuelve nada si faltan credenciales
+
+        user = authenticate(username=username, password=password)
+        if user:
+            return User.objects.filter(id=user.id)  # Devuelve solo el usuario autenticado
+
+        return User.objects.none()  # Si las credenciales son incorrectas
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        user = queryset.first()
+        groups = user.groups.values_list("name", flat=True)
+        proyectos = Proyecto.objects.filter(auth_user_id=user.id).values_list("nombre", flat=True)
+
+        return Response({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "groups": list(groups),
+            "proyectos": list(proyectos),
+        }, status=status.HTTP_200_OK)
