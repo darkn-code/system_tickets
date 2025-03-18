@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load tailwind_filters %}
+{% block content %}
+    <img src="https://salvatierra.astlix.com/img/astlix.png" id="icon" alt="User Icon">
+
+    {% load crispy_forms_tags %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            for (i of [1, 2]) {
+            const togglePassword = document.querySelector(`#password${i}Button`);
+            const password = document.querySelector(`#id_password${i}`);
+
+            togglePassword.addEventListener('click', function (e) {
+
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+
+                if (this.firstChild.classList.contains('bi-eye-slash')) {
+                this.firstChild.classList.remove('bi-eye-slash')
+                this.firstChild.classList.add('bi-eye');
+                }
+                else {
+                this.firstChild.classList.remove('bi-eye');
+                this.firstChild.classList.add('bi-eye-slash');
+                }
+            });
+            }
+        });
+    </script>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+            
+        <button type="submit" class="w-full bg-[#393F44] text-white py-2 rounded-lg hover:bg-blue-600">
+            Iniciar Sesión
+        </button>
+    </form>
+
+    <p class="mt-4 text-sm text-center">
+        ¿No tienes cuenta? <a href="{% url 'register' %}" class="text-blue-500">Regístrate aquí</a>
+    </p>
+
+{% endblock content %}
