@@ -5,7 +5,9 @@ from .views import (
     ListTicketView, DetailTicketView,
     ListStatusTicketView, DetailStatusTicketView,
     ListMensajeView, DetailMensajeView,
-    ListMultimediaView, DetailMultimediaView
+    ListMultimediaView, DetailMultimediaView,
+    ListUserView, DetailUserView,
+    ListGroupView, DetailGroupView
 )
 
 urlpatterns = [
@@ -26,4 +28,10 @@ urlpatterns = [
     
     path('multimedia/', ListMultimediaView.as_view(), name='list_multimedia'),
     path('multimedia/<int:pk>/', DetailMultimediaView.as_view(), name='detail_multimedia'),
+
+     path('usuarios/', ListUserView.as_view(), name='list_usuarios'),
+    path('usuarios/<int:pk>/', DetailUserView.as_view(), name='detail_usuario'),
+    
+    path('grupos/', ListGroupView.as_view(), name='list_grupos'),
+    path('grupos/<int:pk>/', DetailGroupView.as_view(), name='detail_grupo'),
 ]

@@ -18,3 +18,9 @@ tzdata==2024.2
 wincertstore==0.2
 XlsxWriter==3.2.2
 zope.event==5.0
+djangorestframework
+markdown       
+django-filterpyt
+django-crispy-forms
+crispy-tailwind
+mysqlclient
