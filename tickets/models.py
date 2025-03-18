@@ -43,3 +43,11 @@ class Multimedia(models.Model):
     nombre = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class CustomGroup(Group):  # Extiende Group de Django
+    proyecto = models.ForeignKey(Proyecto   , on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Grupo con Proyecto"
+        verbose_name_plural = "Grupos con Proyectos"

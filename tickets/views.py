@@ -113,7 +113,7 @@ class LoginView(ListAPIView):
 
         user = queryset.first()
         groups = user.groups.values_list("name", flat=True)
-        proyectos = Proyecto.objects.filter(auth_user_id=user.id).values_list("nombre", flat=True)
+        proyectos = Proyecto.objects.filter(id__in=user.groups.values_list("customgroup__proyecto", flat=True)).values_list("nombre", flat=True)
 
         return Response({
             "id": user.id,
