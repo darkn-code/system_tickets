@@ -8,7 +8,7 @@ from .views import (
     ListMultimediaView, DetailMultimediaView,
     ListUserView, DetailUserView,
     ListGroupView, DetailGroupView,
-    LoginView
+    LoginView, ListicketUserView
 )
 
 urlpatterns = [
@@ -37,4 +37,6 @@ urlpatterns = [
     path('grupos/<int:pk>/', DetailGroupView.as_view(), name='detail_grupo'),
 
     path("login/", LoginView.as_view(), name="login"),
+
+    path('ticketsUser/<int:pk>/', ListicketUserView.as_view(), name='ticket-user'),
 ]

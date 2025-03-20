@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
+from rest_framework.exceptions import NotFound
 
 class ListProyectoView(ListAPIView, CreateAPIView):
     allowed_methods = ['GET', 'POST']
@@ -30,7 +31,11 @@ class DetailStatusView(RetrieveUpdateDestroyAPIView):
 class ListTicketView(ListAPIView, CreateAPIView):
     allowed_methods = ['GET', 'POST']
     serializer_class = TicketSerializer
-    queryset = Ticket.objects.all()
+    queryset = Ticket.objects.all().prefetch_related('mensajes')
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.prefetch_related('mensajes') 
 
 class DetailTicketView(RetrieveUpdateDestroyAPIView):
     allowed_methods = ['GET', 'PUT', 'DELETE']
@@ -87,6 +92,24 @@ class DetailGroupView(RetrieveUpdateDestroyAPIView):
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = GroupSerializer
     queryset = Group.objects.all()
+
+
+class ListicketUserView(ListAPIView, CreateAPIView):
+    allowed_methods = ['GET', 'POST']
+    serializer_class = TicketSerializer
+    queryset = Ticket.objects.all().prefetch_related('mensajes')
+    def get_queryset(self):
+        user_id = self.kwargs['pk'] 
+        user = User.objects.filter(id=user_id).first()  
+        if not user:
+            raise NotFound("Usuario no encontrado")
+        
+        limit = self.request.query_params.get('limit', None)
+        queryset = Ticket.objects.filter(auth_user=user).prefetch_related('mensajes')
+        print(f"Tickets encontrados para el usuario {user.username}: {queryset.count()}")
+        if limit and limit.isdigit():
+            queryset = queryset[:int(limit)]
+        return queryset
 
 
 class LoginView(ListAPIView):

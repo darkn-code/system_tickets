@@ -3,8 +3,12 @@ from django.contrib.auth.models import User, Group
 
 class Proyecto(models.Model):
     nombre = models.CharField(max_length=255)
+    grupos = models.ManyToManyField(Group, related_name="proyectos")  
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.nombre} ({self.id})" 
 
 class Status(models.Model):
     nombre = models.CharField(max_length=100)
@@ -17,7 +21,8 @@ class Ticket(models.Model):
     visible = models.BooleanField(default=True)
     auth_user_atendiendo = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='tickets_atendidos')
     auth_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tickets_creados')
-    auth_group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE)
+    grupo = models.ForeignKey(Group, on_delete=models.CASCADE) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -29,7 +34,7 @@ class StatusTicket(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class Mensaje(models.Model):
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="mensajes")
     auth_user = models.ForeignKey(User, on_delete=models.CASCADE)
     contenido = models.TextField()
     visible = models.BooleanField(default=True)
@@ -44,10 +49,3 @@ class Multimedia(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
-class CustomGroup(Group):  # Extiende Group de Django
-    proyecto = models.ForeignKey(Proyecto   , on_delete=models.CASCADE, null=True, blank=True)
-
-    class Meta:
-        verbose_name = "Grupo con Proyecto"
-        verbose_name_plural = "Grupos con Proyectos"
