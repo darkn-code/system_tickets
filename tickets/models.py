@@ -15,6 +15,9 @@ class Status(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.nombre} ({self.id})" 
+
 class Ticket(models.Model):
     asunto = models.CharField(max_length=255)
     prioridad = models.IntegerField()
@@ -25,6 +28,9 @@ class Ticket(models.Model):
     grupo = models.ForeignKey(Group, on_delete=models.CASCADE) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.proyecto}:{self.grupo} ({self.id})" 
 
 class StatusTicket(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
