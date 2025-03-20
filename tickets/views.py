@@ -35,6 +35,9 @@ class ListTicketView(ListAPIView, CreateAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        limit = self.request.query_params.get('limit', None)
+        if limit and limit.isdigit():
+            queryset = queryset[:int(limit)]
         return queryset.prefetch_related('mensajes') 
 
 class DetailTicketView(RetrieveUpdateDestroyAPIView):

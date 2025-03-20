@@ -20,7 +20,7 @@ class MensajeSerializer(serializers.ModelSerializer):
 
 class TicketSerializer(serializers.ModelSerializer):
     mensajes = MensajeSerializer(many=True, read_only=True)  # Mostrar mensajes existentes en un ticket
-    nuevo_mensaje = serializers.CharField(write_only=True, required=False)  # Permitir crear un mensaje al crear ticket
+    nuevo_mensaje = serializers.CharField(write_only=True, required=False,style={'base_template': 'textarea.html'})  # Permitir crear un mensaje al crear ticket
 
     class Meta:
         model = Ticket
