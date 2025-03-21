@@ -36,8 +36,17 @@ class ListTicketView(ListAPIView, CreateAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()
         limit = self.request.query_params.get('limit', None)
+        offset = self.request.query_params.get('offset', 0) 
+
+        if offset and offset.isdigit():
+            offset = int(offset)
+        else:
+            offset = 0 
+
         if limit and limit.isdigit():
-            queryset = queryset[:int(limit)]
+            limit = int(limit)
+            queryset = queryset[offset:offset + limit] 
+            
         return queryset.prefetch_related('mensajes') 
 
 class DetailTicketView(RetrieveUpdateDestroyAPIView):
@@ -108,10 +117,18 @@ class ListicketUserView(ListAPIView, CreateAPIView):
             raise NotFound("Usuario no encontrado")
         
         limit = self.request.query_params.get('limit', None)
+        offset = self.request.query_params.get('offset', 0) 
+
+        if offset and offset.isdigit():
+            offset = int(offset)
+        else:
+            offset = 0 
+
         queryset = Ticket.objects.filter(auth_user=user).prefetch_related('mensajes')
         print(f"Tickets encontrados para el usuario {user.username}: {queryset.count()}")
         if limit and limit.isdigit():
-            queryset = queryset[:int(limit)]
+            limit = int(limit)
+            queryset = queryset[offset:offset + limit] 
         return queryset
 
 
@@ -138,13 +155,13 @@ class LoginView(ListAPIView):
             return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
 
         user = queryset.first()
-        groups = user.groups.values_list("name", flat=True)
-        proyectos = Proyecto.objects.filter(id__in=user.groups.values_list("customgroup__proyecto", flat=True)).values_list("nombre", flat=True)
+        groups = user.groups.values_list("id", flat=True)
+        proyectos = Proyecto.objects.filter(grupos__id__in=groups).distinct().values("id", "nombre")
 
         return Response({
             "id": user.id,
             "username": user.username,
             "email": user.email,
-            "groups": list(groups),
+            "groups": list(user.groups.values("id", "name")),
             "proyectos": list(proyectos),
         }, status=status.HTTP_200_OK)
