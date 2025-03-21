@@ -46,7 +46,7 @@ class ListTicketView(ListAPIView, CreateAPIView):
         if limit and limit.isdigit():
             limit = int(limit)
             queryset = queryset[offset:offset + limit] 
-            
+
         return queryset.prefetch_related('mensajes') 
 
 class DetailTicketView(RetrieveUpdateDestroyAPIView):
@@ -155,13 +155,20 @@ class LoginView(ListAPIView):
             return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
 
         user = queryset.first()
-        groups = user.groups.values_list("id", flat=True)
-        proyectos = Proyecto.objects.filter(grupos__id__in=groups).distinct().values("id", "nombre")
+        proyectos = Proyecto.objects.filter(grupos__in=user.groups.all()).distinct()
+
+        proyectos_data = []
+        for proyecto in proyectos:
+            grupos_usuario = proyecto.grupos.filter(id__in=user.groups.values_list("id", flat=True)).values_list("name", flat=True)
+            proyectos_data.append({
+                "id": proyecto.id,
+                "nombre": proyecto.nombre,
+                "grupos": list(grupos_usuario)
+            })
 
         return Response({
             "id": user.id,
             "username": user.username,
             "email": user.email,
-            "groups": list(user.groups.values("id", "name")),
-            "proyectos": list(proyectos),
+            "proyectos": proyectos_data,
         }, status=status.HTTP_200_OK)
