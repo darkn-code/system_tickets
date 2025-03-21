@@ -125,7 +125,6 @@ class ListicketUserView(ListAPIView, CreateAPIView):
             offset = 0 
 
         queryset = Ticket.objects.filter(auth_user=user).prefetch_related('mensajes')
-        print(f"Tickets encontrados para el usuario {user.username}: {queryset.count()}")
         if limit and limit.isdigit():
             limit = int(limit)
             queryset = queryset[offset:offset + limit] 
@@ -159,7 +158,7 @@ class LoginView(ListAPIView):
 
         proyectos_data = []
         for proyecto in proyectos:
-            grupos_usuario = proyecto.grupos.filter(id__in=user.groups.values_list("id", flat=True)).values_list("name", flat=True)
+            grupos_usuario = proyecto.grupos.filter(user=user).values("id", "name") 
             proyectos_data.append({
                 "id": proyecto.id,
                 "nombre": proyecto.nombre,
