@@ -8,7 +8,7 @@ from .views import (
     ListMultimediaView, DetailMultimediaView,
     ListUserView, DetailUserView,
     ListGroupView, DetailGroupView,
-    LoginView, ListicketUserView
+    LoginView, ListicketUserView, SearchTicketView
 )
 
 urlpatterns = [
@@ -39,4 +39,5 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
 
     path('ticketsUser/<int:pk>/', ListicketUserView.as_view(), name='ticket-user'),
+    path('ticketsSearch/', SearchTicketView.as_view(), name='search_tickets'),
 ]

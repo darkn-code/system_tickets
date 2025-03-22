@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import NotFound
+from django.db.models import Q
 
 class ListProyectoView(ListAPIView, CreateAPIView):
     allowed_methods = ['GET', 'POST']
@@ -171,3 +172,17 @@ class LoginView(ListAPIView):
             "email": user.email,
             "proyectos": proyectos_data,
         }, status=status.HTTP_200_OK)
+    
+class SearchTicketView(ListAPIView):
+    serializer_class = TicketSerializer
+    def get_queryset(self):
+        search_text = self.request.query_params.get("asunto", "")
+        queryset = Ticket.objects.filter(Q(asunto__icontains=search_text))
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()           
+        if not queryset.exists():
+            return Response({"message": "No se encontraron tickets con ese asunto."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
