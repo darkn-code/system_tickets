@@ -19,13 +19,23 @@ class MensajeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class TicketSerializer(serializers.ModelSerializer):
-    mensajes = MensajeSerializer(many=True, read_only=True)  # Mostrar mensajes existentes en un ticket
-    nuevo_mensaje = serializers.CharField(write_only=True, required=False,style={'base_template': 'textarea.html'})  # Permitir crear un mensaje al crear ticket
+    mensajes = MensajeSerializer(many=True, read_only=True)  
+    nuevo_mensaje = serializers.CharField(write_only=True, required=False,style={'base_template': 'textarea.html'}) 
+
+    proyecto_nombre = serializers.CharField(source="proyecto.nombre", read_only=True)
+    grupo_nombre = serializers.CharField(source="grupo.name", read_only=True)
+    auth_user_nombre = serializers.CharField(source="auth_user.username", read_only=True)
+    auth_user_atendiendo_nombre = serializers.CharField(source="auth_user_atendiendo.username", read_only=True)
 
     class Meta:
         model = Ticket
-        fields = ["id", "asunto", "prioridad", "visible", "auth_user_atendiendo",
-                  "auth_user", "proyecto", "grupo", "created_at", "updated_at", "mensajes", "nuevo_mensaje"]
+        fields = ["id", "asunto", "prioridad", "visible",
+            "auth_user", "auth_user_nombre",
+            "auth_user_atendiendo", "auth_user_atendiendo_nombre",
+            "proyecto", "proyecto_nombre",
+            "grupo", "grupo_nombre",
+            "created_at", "updated_at",
+            "mensajes", "nuevo_mensaje"]
         
     def validate(self, data):
         """ Validar que el grupo pertenece al proyecto seleccionado """
@@ -42,11 +52,10 @@ class TicketSerializer(serializers.ModelSerializer):
         nuevo_mensaje = validated_data.pop("nuevo_mensaje", None)  # Extraer el mensaje si existe
         ticket = Ticket.objects.create(**validated_data)
 
-        # Si se envió un mensaje, crearlo asociado al Ticket
         if nuevo_mensaje:
             Mensaje.objects.create(
                 ticket=ticket,
-                auth_user=ticket.auth_user,  # El usuario que creó el ticket es el autor del mensaje
+                auth_user=ticket.auth_user, 
                 contenido=nuevo_mensaje,
                 visible=True
             )
