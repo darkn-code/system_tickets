@@ -91,6 +91,18 @@ class ListUserView(ListAPIView, CreateAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    def get_queryset(self):
+        queryset = User.objects.all()
+        is_staff_param = self.request.query_params.get('is_staff', None)
+
+        if is_staff_param is not None:
+            if is_staff_param.lower() == "true":
+                queryset = queryset.filter(is_staff=True)
+            elif is_staff_param.lower() == "false":
+                queryset = queryset.filter(is_staff=False)
+
+        return queryset
+
 class DetailUserView(RetrieveUpdateDestroyAPIView):
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = UserSerializer

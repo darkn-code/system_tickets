@@ -3,9 +3,14 @@ from django.contrib.auth.models import User, Group
 from .models import Proyecto, Status, Ticket, StatusTicket, Mensaje, Multimedia
 
 class ProyectoSerializer(serializers.ModelSerializer):
+    grupos = serializers.SerializerMethodField()
+
     class Meta:
         model = Proyecto
-        fields = '__all__'
+        fields = ['id', 'nombre', 'grupos', 'created_at', 'updated_at']
+
+    def get_grupos(self, obj):
+        return list(obj.grupos.values('id', 'name'))
 
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,6 +32,9 @@ class TicketSerializer(serializers.ModelSerializer):
     auth_user_nombre = serializers.CharField(source="auth_user.username", read_only=True)
     auth_user_atendiendo_nombre = serializers.CharField(source="auth_user_atendiendo.username", read_only=True)
 
+    status_ticket_id = serializers.SerializerMethodField()
+    status_ticket_nombre = serializers.SerializerMethodField()
+
     class Meta:
         model = Ticket
         fields = ["id", "asunto", "prioridad", "visible",
@@ -35,7 +43,18 @@ class TicketSerializer(serializers.ModelSerializer):
             "proyecto", "proyecto_nombre",
             "grupo", "grupo_nombre",
             "created_at", "updated_at",
-            "mensajes", "nuevo_mensaje"]
+            "mensajes", "nuevo_mensaje",
+            "status_ticket_id", "status_ticket_nombre"]
+        
+    def get_status_ticket_id(self, ticket):
+        """ Obtener el ID del último estado asignado al ticket """
+        status_ticket = StatusTicket.objects.filter(ticket=ticket.id).order_by('-created_at').first()
+        return status_ticket.id if status_ticket else None  
+
+    def get_status_ticket_nombre(self, ticket):
+        """ Obtener el nombre del último estado asignado al ticket """
+        status_ticket = StatusTicket.objects.filter(ticket=ticket.id).order_by('-created_at').first()
+        return status_ticket.status.nombre if status_ticket else None  
         
     def validate(self, data):
         """ Validar que el grupo pertenece al proyecto seleccionado """
@@ -59,7 +78,14 @@ class TicketSerializer(serializers.ModelSerializer):
                 contenido=nuevo_mensaje,
                 visible=True
             )
+        
+        status = Status.objects.filter(id=1).first()
+        status_ticket = None
+        if status:
+            status_ticket = StatusTicket.objects.create(ticket=ticket, status=status)
 
+        ticket.status_ticket_id = status_ticket.id if status_ticket else None
+        ticket.status_ticket_nombre = status.nombre if status else None
         return ticket
 
 class StatusTicketSerializer(serializers.ModelSerializer):
@@ -84,7 +110,7 @@ class UserSerializer(serializers.ModelSerializer):
         resultado = []
 
         for proyecto in proyectos:
-            grupos_usuario = proyecto.grupos.filter(user=user).values_list("name", flat=True)
+            grupos_usuario = proyecto.grupos.filter(user=user).values("id", "name")
             resultado.append({
                 "id": proyecto.id,
                 "nombre": proyecto.nombre,
