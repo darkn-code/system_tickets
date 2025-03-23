@@ -117,15 +117,28 @@ class ListicketUserView(ListAPIView, CreateAPIView):
         if not user:
             raise NotFound("Usuario no encontrado")
         
+        queryset = Ticket.objects.filter(auth_user=user).prefetch_related('mensajes')
+
+        grupo_id = self.request.query_params.get('grupo', None)
+        proyecto_id = self.request.query_params.get('proyecto', None)
+        prioridad = self.request.query_params.get('prioridad', None)
         limit = self.request.query_params.get('limit', None)
-        offset = self.request.query_params.get('offset', 0) 
+        offset = self.request.query_params.get('offset', 0)
+
+        if grupo_id and grupo_id.isdigit():
+            queryset = queryset.filter(grupo_id=grupo_id)
+
+        if proyecto_id and proyecto_id.isdigit():
+            queryset = queryset.filter(proyecto_id=proyecto_id)
+
+        if prioridad and prioridad.isdigit():
+            queryset = queryset.filter(prioridad=prioridad)
 
         if offset and offset.isdigit():
             offset = int(offset)
         else:
             offset = 0 
-
-        queryset = Ticket.objects.filter(auth_user=user).prefetch_related('mensajes')
+                    
         if limit and limit.isdigit():
             limit = int(limit)
             queryset = queryset[offset:offset + limit] 
