@@ -74,9 +74,24 @@ class MultimediaSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    proyectos = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'proyectos']
+
+    def get_proyectos(self, user):
+        proyectos = Proyecto.objects.filter(grupos__in=user.groups.all()).distinct()
+        resultado = []
+
+        for proyecto in proyectos:
+            grupos_usuario = proyecto.grupos.filter(user=user).values_list("name", flat=True)
+            resultado.append({
+                "id": proyecto.id,
+                "nombre": proyecto.nombre,
+                "grupos": list(grupos_usuario)
+            })
+
+        return resultado
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:

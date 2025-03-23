@@ -111,6 +111,7 @@ class ListicketUserView(ListAPIView, CreateAPIView):
     allowed_methods = ['GET', 'POST']
     serializer_class = TicketSerializer
     queryset = Ticket.objects.all().prefetch_related('mensajes')
+
     def get_queryset(self):
         user_id = self.kwargs['pk'] 
         user = User.objects.filter(id=user_id).first()  
@@ -191,6 +192,31 @@ class SearchTicketView(ListAPIView):
     def get_queryset(self):
         search_text = self.request.query_params.get("asunto", "")
         queryset = Ticket.objects.filter(Q(asunto__icontains=search_text))
+        
+        grupo_id = self.request.query_params.get('grupo', None)
+        proyecto_id = self.request.query_params.get('proyecto', None)
+        prioridad = self.request.query_params.get('prioridad', None)
+        limit = self.request.query_params.get('limit', None)
+        offset = self.request.query_params.get('offset', 0)
+
+        if grupo_id and grupo_id.isdigit():
+            queryset = queryset.filter(grupo_id=grupo_id)
+
+        if proyecto_id and proyecto_id.isdigit():
+            queryset = queryset.filter(proyecto_id=proyecto_id)
+
+        if prioridad and prioridad.isdigit():
+            queryset = queryset.filter(prioridad=prioridad)
+
+        if offset and offset.isdigit():
+            offset = int(offset)
+        else:
+            offset = 0 
+                    
+        if limit and limit.isdigit():
+            limit = int(limit)
+            queryset = queryset[offset:offset + limit] 
+            
         return queryset
 
     def list(self, request, *args, **kwargs):
