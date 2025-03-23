@@ -120,6 +120,7 @@ class ListicketUserView(ListAPIView, CreateAPIView):
         
         queryset = Ticket.objects.filter(auth_user=user).prefetch_related('mensajes')
 
+        asunto = self.request.query_params.get('asunto', None)
         grupo_id = self.request.query_params.get('grupo', None)
         proyecto_id = self.request.query_params.get('proyecto', None)
         prioridad = self.request.query_params.get('prioridad', None)
@@ -134,6 +135,9 @@ class ListicketUserView(ListAPIView, CreateAPIView):
 
         if prioridad and prioridad.isdigit():
             queryset = queryset.filter(prioridad=prioridad)
+            
+        if asunto:
+            queryset = queryset.filter(asunto__icontains=asunto)
 
         if offset and offset.isdigit():
             offset = int(offset)
