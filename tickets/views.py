@@ -8,28 +8,39 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import NotFound
 from django.db.models import Q
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class ListProyectoView(ListAPIView, CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = ProyectoSerializer
     queryset = Proyecto.objects.all()
 
 class DetailProyectoView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = ProyectoSerializer
     queryset = Proyecto.objects.all()
 
 class ListStatusView(ListAPIView, CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = StatusSerializer
     queryset = Status.objects.all()
 
 class DetailStatusView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = StatusSerializer
     queryset = Status.objects.all()
 
 class ListTicketView(ListAPIView, CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = TicketSerializer
     queryset = Ticket.objects.all().prefetch_related('mensajes')
@@ -51,42 +62,58 @@ class ListTicketView(ListAPIView, CreateAPIView):
         return queryset.prefetch_related('mensajes') 
 
 class DetailTicketView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = TicketSerializer
     queryset = Ticket.objects.all()
 
 class ListStatusTicketView(ListAPIView, CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = StatusTicketSerializer
     queryset = StatusTicket.objects.all()
 
 class DetailStatusTicketView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = StatusTicketSerializer
     queryset = StatusTicket.objects.all()
 
 class ListMensajeView(ListAPIView, CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = MensajeSerializer
     queryset = Mensaje.objects.all()
 
 class DetailMensajeView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = MensajeSerializer
     queryset = Mensaje.objects.all()
 
 class ListMultimediaView(ListAPIView, CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = MultimediaSerializer
     queryset = Multimedia.objects.all()
 
 class DetailMultimediaView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = MultimediaSerializer
     queryset = Multimedia.objects.all()
 
 
 class ListUserView(ListAPIView, CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = UserSerializer
     queryset = User.objects.all()
@@ -104,16 +131,22 @@ class ListUserView(ListAPIView, CreateAPIView):
         return queryset
 
 class DetailUserView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
 class ListGroupView(ListAPIView, CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = GroupSerializer
     queryset = Group.objects.all()
 
 class DetailGroupView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = GroupSerializer
     queryset = Group.objects.all()

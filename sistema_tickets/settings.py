@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,13 +45,14 @@ INSTALLED_APPS = [
     'usuarios', 
     'tickets', 
     'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+   # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -155,5 +157,21 @@ LOGIN_URL = 'login'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # El token de acceso expirará en 15 minutos
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # El token de refresco expirará en 1 día
+    'ROTATE_REFRESH_TOKENS': False,  # Si no quieres rotar el token de refresco
+    'BLACKLIST_AFTER_ROTATION': False,  # Si no quieres que se invalide el token después de rotarlo
+    'ALGORITHM': 'HS256',  # Algoritmo de firma
+    'SIGNING_KEY': 'your-secret-key',  # Cambia esto por una clave secreta más segura
+}
+

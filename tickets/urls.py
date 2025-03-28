@@ -10,6 +10,7 @@ from .views import (
     ListGroupView, DetailGroupView,
     LoginView, ListicketUserView, SearchTicketView
 )
+from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
     path('proyectos/', ListProyectoView.as_view(), name='list_proyectos'),
@@ -40,4 +41,7 @@ urlpatterns = [
 
     path('ticketsUser/<int:pk>/', ListicketUserView.as_view(), name='ticket-user'),
     path('ticketsSearch/', SearchTicketView.as_view(), name='search_tickets'),
+
+    path('token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Obtener el token
+    path('token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),  # Renovar el token
 ]
