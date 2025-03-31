@@ -116,7 +116,7 @@ class DetailMultimediaView(RetrieveUpdateDestroyAPIView):
 
 
 class ListUserView(ListAPIView, CreateAPIView):
-    #authentication_classes = [JWTAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = UserSerializer
@@ -135,7 +135,7 @@ class ListUserView(ListAPIView, CreateAPIView):
         return queryset
 
 class DetailUserView(RetrieveUpdateDestroyAPIView):
-    #authentication_classes = [JWTAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = UserSerializer
