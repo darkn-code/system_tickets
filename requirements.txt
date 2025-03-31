@@ -24,3 +24,5 @@ django-filterpyt
 django-crispy-forms
 crispy-tailwind
 mysqlclient
+djangorestframework_simplejwt==5.5.0
+drf-spectacular

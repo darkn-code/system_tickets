@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User, Group
-from .models import Proyecto, Status, Ticket, StatusTicket, Mensaje, Multimedia
+from .models import Proyecto, Status, Ticket, StatusTicket, Mensaje, Multimedia, UserProfile
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class ProyectoSerializer(serializers.ModelSerializer):
     grupos = serializers.SerializerMethodField()
@@ -101,9 +102,12 @@ class MultimediaSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     proyectos = serializers.SerializerMethodField()
+    rol = serializers.IntegerField(write_only=True) 
+    rol_display = serializers.SerializerMethodField()
+    password = serializers.CharField(write_only=True, required=True) 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'proyectos']
+        fields = ['id', 'username','password', 'email', 'first_name', 'last_name', 'rol','rol_display', 'proyectos']
 
     def get_proyectos(self, user):
         proyectos = Proyecto.objects.filter(grupos__in=user.groups.all()).distinct()
@@ -118,8 +122,82 @@ class UserSerializer(serializers.ModelSerializer):
             })
 
         return resultado
+    
+    def get_rol(self, user):
+        """ Obtener el rol desde UserProfile """
+        return getattr(UserProfile.objects.filter(user=user).first(), 'rol', 0) 
+    
+    def get_rol_display(self, user):
+        return getattr(UserProfile.objects.filter(user=user).first(), 'rol', 0) 
+    
+    def create(self, validated_data):
+        rol = validated_data.pop('rol', None) 
+        password = validated_data.pop('password', None)
+        user = User.objects.create(**validated_data)
+        
+        if password:
+            user.set_password(password)
+        else:
+            user.set_password('defaultpassword123')  # Contraseña por defecto
+
+        user.save()
+
+        user.userprofile.rol = rol if rol is not None else 3  
+        user.userprofile.save()
+
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        rol = validated_data.pop('rol', 5) 
+        if password:
+            instance.set_password(password)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+
+        if rol is not None:
+            profile, created = UserProfile.objects.get_or_create(user=instance)
+            profile.rol = rol
+            profile.save()
+
+        return instance
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['id', 'name']
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user = self.user  # Usuario autenticado
+
+        # Datos del usuario
+        data['user_id'] = user.id
+        data['username'] = user.username
+        data['first_name'] = user.first_name
+        data['last_name'] = user.last_name
+        data['email'] = user.email
+        user_profile = UserProfile.objects.get(user=user)  # Obtener el perfil del usuario
+        data['rol'] = user_profile.rol 
+
+        # Obtener los proyectos del usuario con sus grupos
+        proyectos = Proyecto.objects.filter(grupos__in=user.groups.all()).distinct()
+        proyectos_data = []
+        for proyecto in proyectos:
+            grupos_usuario = proyecto.grupos.filter(user=user).values("id", "name")
+            proyectos_data.append({
+                "id": proyecto.id,
+                "nombre": proyecto.nombre,
+                "grupos": list(grupos_usuario)  # Lista de grupos con id y nombre
+            })
+
+        data['proyectos'] = proyectos_data  # Agregar proyectos al JSON de respuesta
+
+        return data
+
+

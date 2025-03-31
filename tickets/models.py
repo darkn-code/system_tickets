@@ -1,5 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
+from django.db import models
+
+
+class UserProfile(models.Model):
+    ROL_CHOICES = [
+        (1, 'Admin'),
+        (2, 'Soporte'),
+        (3, 'Usuario')
+    ]
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    rol = models.IntegerField(choices=ROL_CHOICES, default=3)
+
+    def __str__(self):
+        return dict(self._meta.get_field('rol').choices).get(self.rol, 'Unknown')
 
 class Proyecto(models.Model):
     nombre = models.CharField(max_length=255)

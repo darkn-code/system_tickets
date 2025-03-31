@@ -8,13 +8,20 @@ from .views import (
     ListMultimediaView, DetailMultimediaView,
     ListUserView, DetailUserView,
     ListGroupView, DetailGroupView,
-    LoginView, ListicketUserView, SearchTicketView
+    LoginView, ListicketUserView, SearchTicketView,CustomTokenObtainPairView
 )
+from rest_framework.routers import DefaultRouter
+from .viewsets import ProyectosViewSet
+
+from rest_framework_simplejwt.views import TokenVerifyView
 from rest_framework_simplejwt import views as jwt_views
 
+router = DefaultRouter()
+router.register('proyectos',ProyectosViewSet)
+
 urlpatterns = [
-    path('proyectos/', ListProyectoView.as_view(), name='list_proyectos'),
-    path('proyectos/<int:pk>/', DetailProyectoView.as_view(), name='detail_proyecto'),
+    #path('proyectos/', ListProyectoView.as_view(), name='list_proyectos'),
+    #path('proyectos/<int:pk>/', DetailProyectoView.as_view(), name='detail_proyecto'),
     
     path('statuses/', ListStatusView.as_view(), name='list_statuses'),
     path('statuses/<int:pk>/', DetailStatusView.as_view(), name='detail_status'),
@@ -42,6 +49,8 @@ urlpatterns = [
     path('ticketsUser/<int:pk>/', ListicketUserView.as_view(), name='ticket-user'),
     path('ticketsSearch/', SearchTicketView.as_view(), name='search_tickets'),
 
-    path('token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Obtener el token
+    path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),  # Obtener el token
     path('token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),  # Renovar el token
-]
+    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+] + router.urls

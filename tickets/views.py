@@ -1,7 +1,7 @@
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView
 from django.contrib.auth.models import User, Group
 from .models import Proyecto, Status, Ticket, StatusTicket, Mensaje, Multimedia
-from .serializers import ProyectoSerializer, StatusSerializer, TicketSerializer, StatusTicketSerializer, MensajeSerializer, MultimediaSerializer,  UserSerializer, GroupSerializer
+from .serializers import ProyectoSerializer, StatusSerializer, TicketSerializer, StatusTicketSerializer, MensajeSerializer, MultimediaSerializer,  UserSerializer, GroupSerializer, CustomTokenObtainPairSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,6 +9,8 @@ from django.contrib.auth import authenticate
 from rest_framework.exceptions import NotFound
 from django.db.models import Q
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 class ListProyectoView(ListAPIView, CreateAPIView):
     authentication_classes = [JWTAuthentication]
@@ -30,6 +32,8 @@ class ListStatusView(ListAPIView, CreateAPIView):
     allowed_methods = ['GET', 'POST']
     serializer_class = StatusSerializer
     queryset = Status.objects.all()
+
+
 
 class DetailStatusView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
@@ -112,7 +116,7 @@ class DetailMultimediaView(RetrieveUpdateDestroyAPIView):
 
 
 class ListUserView(ListAPIView, CreateAPIView):
-    authentication_classes = [JWTAuthentication]
+    #authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = UserSerializer
@@ -131,7 +135,7 @@ class ListUserView(ListAPIView, CreateAPIView):
         return queryset
 
 class DetailUserView(RetrieveUpdateDestroyAPIView):
-    authentication_classes = [JWTAuthentication]
+    #authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
     serializer_class = UserSerializer
@@ -274,3 +278,6 @@ class SearchTicketView(ListAPIView):
             return Response({"message": "No se encontraron tickets con ese asunto."}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
