@@ -64,6 +64,7 @@ class Mensaje(models.Model):
 
 class Multimedia(models.Model):
     multimedia_type = models.CharField(max_length=50)
+    multimedia_id = models.IntegerField()
     url = models.URLField()
     nombre = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
