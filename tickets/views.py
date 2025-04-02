@@ -1,7 +1,9 @@
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView
 from django.contrib.auth.models import User, Group
 from .models import Proyecto, Status, Ticket, StatusTicket, Mensaje, Multimedia
-from .serializers import ProyectoSerializer, StatusSerializer, TicketSerializer, StatusTicketSerializer, MensajeSerializer, MultimediaSerializer,  UserSerializer, GroupSerializer, CustomTokenObtainPairSerializer
+from .serializers import (ProyectoSerializer, StatusSerializer, TicketSerializer, TicketiDSerializer,
+                          StatusTicketSerializer, MensajeSerializer, MultimediaSerializer,  
+                          UserSerializer, GroupSerializer, CustomTokenObtainPairSerializer)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -69,7 +71,7 @@ class DetailTicketView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'PUT', 'DELETE']
-    serializer_class = TicketSerializer
+    serializer_class = TicketiDSerializer
     queryset = Ticket.objects.all()
 
 class ListStatusTicketView(ListAPIView, CreateAPIView):
@@ -157,6 +159,8 @@ class DetailGroupView(RetrieveUpdateDestroyAPIView):
 
 
 class ListicketUserView(ListAPIView, CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     allowed_methods = ['GET', 'POST']
     serializer_class = TicketSerializer
     queryset = Ticket.objects.all().prefetch_related('mensajes')
