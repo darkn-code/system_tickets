@@ -52,7 +52,8 @@ class ListTicketView(ListAPIView, CreateAPIView):
     queryset = Ticket.objects.all().prefetch_related('mensajes')
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        user = self.request.user 
+        queryset = Ticket.objects.filter(auth_user=user).prefetch_related('mensajes')
         limit = self.request.query_params.get('limit', None)
         offset = self.request.query_params.get('offset', 0) 
 

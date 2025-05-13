@@ -17,12 +17,19 @@ class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
         fields = '__all__'
+    
 
 
 class MensajeSerializer(serializers.ModelSerializer):
+    auth_user_nombre = serializers.CharField(source='auth_user.username', read_only=True)
     class Meta:
         model = Mensaje
-        fields = '__all__'
+        fields = ['id', 'contenido', 'visible', 'created_at','ticket', 'auth_user_nombre']
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['auth_user'] = request.user
+        return Mensaje.objects.create(**validated_data)
 
 class TicketSerializer(serializers.ModelSerializer):
     mensaje_count = serializers.SerializerMethodField() 
@@ -38,12 +45,13 @@ class TicketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ticket
-        fields = ["id", "asunto", "prioridad",
+        fields = ["id", "asunto", "prioridad","auth_user_atendiendo",
              "auth_user_nombre","auth_user_atendiendo_nombre",
             "proyecto", "proyecto_nombre",
             "grupo", "grupo_nombre",
             "created_at","mensaje_count", "nuevo_mensaje",
             "status_ticket_id", "status_ticket_nombre"]
+        
         
     def get_mensaje_count(self, ticket):
         """ 🔹 Obtener la cantidad de mensajes asociados al ticket """
@@ -71,9 +79,10 @@ class TicketSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        request = self.context.get('request')
         nuevo_mensaje = validated_data.pop("nuevo_mensaje", None)  # Extraer el mensaje si existe
+        validated_data['auth_user'] = request.user
         ticket = Ticket.objects.create(**validated_data)
-
         if nuevo_mensaje:
             Mensaje.objects.create(
                 ticket=ticket,
@@ -112,6 +121,7 @@ class TicketiDSerializer(serializers.ModelSerializer):
             "grupo", "grupo_nombre",
             "created_at","mensajes", "nuevo_mensaje",
             "status_ticket_id", "status_ticket_nombre"]
+        read_only_fields = ['auth_user_nombre', 'auth_user_atendiendo_nombre', 'mensajes', 'created_at']
         
         
     def get_status_ticket_id(self, ticket):
@@ -136,7 +146,9 @@ class TicketiDSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        request = self.context.get('request')
         nuevo_mensaje = validated_data.pop("nuevo_mensaje", None)  # Extraer el mensaje si existe
+        validated_data['auth_user'] = request.user
         ticket = Ticket.objects.create(**validated_data)
 
         if nuevo_mensaje:
