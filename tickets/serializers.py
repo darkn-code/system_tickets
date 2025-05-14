@@ -103,7 +103,6 @@ class TicketSerializer(serializers.ModelSerializer):
 
 class TicketiDSerializer(serializers.ModelSerializer):
     mensajes = MensajeSerializer(many=True, read_only=True)  
-    nuevo_mensaje = serializers.CharField(write_only=True, required=False,style={'base_template': 'textarea.html'}) 
 
     proyecto_nombre = serializers.CharField(source="proyecto.nombre", read_only=True)
     grupo_nombre = serializers.CharField(source="grupo.name", read_only=True)
@@ -115,13 +114,13 @@ class TicketiDSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ticket
-        fields = ["id", "asunto", "prioridad",
+        fields = ["id", "asunto", "prioridad","auth_user_atendiendo","visible",
             "auth_user_nombre","auth_user_atendiendo_nombre",
             "proyecto", "proyecto_nombre",
             "grupo", "grupo_nombre",
-            "created_at","mensajes", "nuevo_mensaje",
+            "created_at","mensajes",
             "status_ticket_id", "status_ticket_nombre"]
-        read_only_fields = ['auth_user_nombre', 'auth_user_atendiendo_nombre', 'mensajes', 'created_at']
+        read_only_fields = ['auth_user_nombre', 'auth_user_atendiendo_nombre','proyecto','grupo', 'created_at']
         
         
     def get_status_ticket_id(self, ticket):
@@ -134,39 +133,7 @@ class TicketiDSerializer(serializers.ModelSerializer):
         status_ticket = StatusTicket.objects.filter(ticket=ticket.id).order_by('-created_at').first()
         return status_ticket.status.nombre if status_ticket else None  
         
-    def validate(self, data):
-        """ Validar que el grupo pertenece al proyecto seleccionado """
-        proyecto = data.get("proyecto")
-        grupo = data.get("grupo")
-
-        if proyecto and grupo:
-            if grupo not in proyecto.grupos.all():
-                raise serializers.ValidationError("El grupo seleccionado no pertenece a este proyecto.")
-
-        return data
-
-    def create(self, validated_data):
-        request = self.context.get('request')
-        nuevo_mensaje = validated_data.pop("nuevo_mensaje", None)  # Extraer el mensaje si existe
-        validated_data['auth_user'] = request.user
-        ticket = Ticket.objects.create(**validated_data)
-
-        if nuevo_mensaje:
-            Mensaje.objects.create(
-                ticket=ticket,
-                auth_user=ticket.auth_user, 
-                contenido=nuevo_mensaje,
-                visible=True
-            )
-        
-        status = Status.objects.filter(id=1).first()
-        status_ticket = None
-        if status:
-            status_ticket = StatusTicket.objects.create(ticket=ticket, status=status)
-
-        ticket.status_ticket_id = status_ticket.id if status_ticket else None
-        ticket.status_ticket_nombre = status.nombre if status else None
-        return ticket
+  
 
 class StatusTicketSerializer(serializers.ModelSerializer):
     class Meta:
