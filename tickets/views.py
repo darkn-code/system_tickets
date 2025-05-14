@@ -53,7 +53,11 @@ class ListTicketView(ListAPIView, CreateAPIView):
 
     def get_queryset(self):
         user = self.request.user 
-        queryset = Ticket.objects.filter(auth_user=user).prefetch_related('mensajes')
+        perfil = getattr(user, "profile", None)
+        if perfil and perfil.rol == 1:  # Admin
+            queryset = Ticket.objects.all().prefetch_related('mensajes')
+        else:
+            queryset = Ticket.objects.filter(auth_user=user).prefetch_related('mensajes')
         limit = self.request.query_params.get('limit', None)
         offset = self.request.query_params.get('offset', 0) 
 
